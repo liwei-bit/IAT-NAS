@@ -22,6 +22,8 @@ that ours effectively mitigates class imbalance and gains better classification 
 rank consistency comparing with recent state-of-the-art methods.
 
 <img width="4208" height="1795" alt="pipeline" src="https://github.com/user-attachments/assets/0ef623ff-5701-4662-b6ad-7b25c26eb1c8" />
+
+
 ## Reproduction process
 ### 1.Dataset preparation 
  MedMNIST ISIC Cifar10 Cifar100 Imagenet BUSI
