@@ -1,4 +1,4 @@
-# IEZNAS
+# IAT-NAS
 Imbalance-Aware Training-Free Neural Architecture Search for Clinical Images Classification
 
 # ABSTRACT
