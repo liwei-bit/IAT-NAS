@@ -1,33 +1,321 @@
 # IAT-NAS
-Imbalance-Aware Training-Free Neural Architecture Search for Clinical Images Classification
 
-# ABSTRACT
-Clinical image classification is pivotal for early disease screening and clinical decision support,
-which plays crucial role in improving diagnostic efficiency. Clinical data commonly suffer from
-class imbalance, wherein lesion classes contain far fewer samples than prevalent or negative
-classes. Despite existing convolutional neural networks- and neural architecture search-based
-methods have shown great potential in image classification by virtue of strong inductive biases
-and automated architecture optimization, respectively. However, there still exists notable limita
-tions, i.e., high computational cost, poor transferability and susceptibility to local optima. To this
-end, we, in this paper, propose imbalance-aware training-free neural architecture search coupled
-with evolutionary computation to achieve accurate clinical image classification. Specifically, we
-firstly propose training-free architecture search to avoid manual architecture design to further
-reduce training cost. Then, considering that it may cause weak correlation of proxy metrics
-under class-imbalanced scenarios by directly transferring existing methods to medical datasets,
-we design zero-cost proxy tailored for imbalanced clinical image classification. Besides, we
-introduce three selection mutation with in an evolutionary framework to enhance population
-diversity during architecture search and improve discovery of high-quality architectures, which
-is desired to avoid entrapment in local optima. The experimental results on open datasets show
-that ours effectively mitigates class imbalance and gains better classification performance and
-rank consistency comparing with recent state-of-the-art methods.
+## Imbalance-Aware Training-Free Neural Architecture Search for Clinical Image Classification
 
-<img width="4208" height="1795" alt="pipeline" src="https://github.com/user-attachments/assets/0ef623ff-5701-4662-b6ad-7b25c26eb1c8" />
+IAT-NAS is an imbalance-aware training-free neural architecture search framework for efficient clinical image classification. It combines an imbalance-aware zero-cost proxy with evolutionary computation to identify high-quality neural architectures without repeatedly training candidate networks.
 
+## Abstract
 
-## Reproduction process
-### 1.Dataset preparation 
- MedMNIST ISIC Cifar10 Cifar100 Imagenet BUSI
-### 2.Search space
- NAS-Bench-201
-### 3.Environment configuration
- Python310 torch
+Clinical image classification plays a critical role in early disease screening and clinical decision support. However, clinical datasets often exhibit severe class imbalance, with substantially fewer samples from lesion or disease-positive categories than from prevalent or negative categories. Although convolutional neural networks and neural architecture search have achieved promising performance in image classification, existing methods are often limited by high computational overhead, weak transferability, and susceptibility to local optima.
+
+To address these limitations, we propose **IAT-NAS**, an imbalance-aware training-free neural architecture search framework integrated with evolutionary computation. First, IAT-NAS employs training-free architecture evaluation to avoid repeatedly training candidate networks during the search process, thereby substantially reducing the search cost. Second, because directly applying existing zero-cost proxies to medical datasets may result in weak ranking correlations under class-imbalanced conditions, we introduce an imbalance-aware zero-cost proxy specifically designed for clinical image classification. Third, a three-mechanism evolutionary search strategy is developed to enhance population diversity and improve global exploration. It consists of softmax-based parent selection, adaptive mutation, and population-variance-based mutation control.
+
+Experimental results on multiple publicly available datasets demonstrate that IAT-NAS effectively alleviates the adverse effects of class imbalance and achieves competitive classification performance and stronger architecture-ranking consistency compared with recent state-of-the-art methods.
+
+## Key Contributions
+
+- **Training-free architecture evaluation:** Candidate architectures are evaluated without full network training, substantially reducing the computational cost of neural architecture search.
+
+- **Imbalance-aware zero-cost proxy:** A task-specific proxy is designed to provide more reliable architecture rankings under class-imbalanced clinical data.
+
+- **Diversity-aware evolutionary search:** Softmax-based parent selection, adaptive mutation, and variance-based mutation control are integrated into the evolutionary framework to enhance population diversity and reduce premature convergence.
+
+- **Extensive experimental validation:** IAT-NAS is evaluated on multiple clinical image datasets and standard NAS benchmarks in terms of classification performance, ranking consistency, and search efficiency.
+
+## Overall Framework
+
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/0ef623ff-5701-4662-b6ad-7b25c26eb1c8"
+    width="900"
+    alt="Overall framework of IAT-NAS"
+  />
+</p>
+
+<p align="center">
+  <em>Overall framework of the proposed IAT-NAS method.</em>
+</p>
+
+## Method Overview
+
+IAT-NAS consists of an imbalance-aware training-free evaluation method and a diversity-aware evolutionary architecture search algorithm.
+
+### Imbalance-Aware Training-Free Evaluation
+
+The proposed zero-cost proxy evaluates candidate architectures using only a small number of forward and backward operations. Class-frequency-aware weighting is introduced to reduce the dominance of majority classes and improve the ranking consistency between proxy scores and the final performance of candidate architectures.
+
+### Evolutionary Architecture Search
+
+The evolutionary search process contains three complementary mechanisms:
+
+1. **Softmax-based parent selection:** Candidate parents are sampled according to a temperature-controlled softmax distribution over their normalized proxy scores.
+
+2. **Adaptive mutation:** Architectures with relatively low proxy scores are assigned higher mutation rates to encourage exploration, whereas high-quality architectures undergo more conservative mutations.
+
+3. **Variance-based mutation control:** The global mutation rate is dynamically adjusted according to the score variance of the current population. A low population variance increases exploration, while a high variance encourages stable exploitation.
+
+The three mechanisms jointly improve population diversity and help the search process discover high-quality architectures without requiring candidate-network training.
+
+## Search Space
+
+IAT-NAS adopts the **NAS-Bench-201** cell-based search space. Each candidate cell contains six directed edges, and each edge selects one operation from the following set:
+
+- `none`
+- `skip_connect`
+- `conv1x1`
+- `conv3x3`
+- `avg_pool_3x3`
+
+This results in a unified and reproducible search space for evaluating training-free architecture-ranking methods.
+
+## Datasets
+
+The experiments involve both clinical image datasets and standard NAS benchmark datasets.
+
+| Category | Dataset | Task |
+|---|---|---|
+| Clinical image dataset | MedMNIST | Multi-domain medical image classification |
+| Clinical image dataset | ISIC-2019 | Skin lesion classification |
+| Clinical image dataset | BUSI | Breast ultrasound image classification |
+| NAS benchmark dataset | CIFAR-10 | Architecture-ranking evaluation |
+| NAS benchmark dataset | CIFAR-100 | Architecture-ranking evaluation |
+| NAS benchmark dataset | ImageNet16-120 | Architecture-ranking evaluation |
+
+The datasets should be downloaded from their official sources. Please comply with the corresponding licenses and terms of use.
+
+## Repository Structure
+
+```text
+IAT-NAS/
+├── ieznas_switchable.py
+├── lib/
+│   ├── dataop/
+│   │   └── ISIC_2019.py
+│   ├── models/
+│   │   └── nas201_model.py
+│   ├── nas_201_api/
+│   │   ├── __init__.py
+│   │   └── api.py
+│   └── procedures/
+│       ├── fisher_proxy.py
+│       ├── fisher_proxy_patch.py
+│       ├── fisher_proxy_optimized.py
+│       ├── otherproxies.py
+│       └── proxies.py
+└── README.md
+```
+
+## Environment
+
+The code is implemented in Python using PyTorch.
+
+### Main Dependencies
+
+- Python 3.10
+- PyTorch
+- torchvision
+- NumPy
+- pandas
+- Pillow
+- scikit-learn
+- tqdm
+- MedMNIST
+
+A CUDA-enabled GPU is recommended for efficient proxy calculation and architecture search.
+
+## Installation
+
+Clone this repository:
+
+```bash
+git clone https://github.com/liwei-bit/IAT-NAS.git
+cd IAT-NAS
+```
+
+Create a Conda environment:
+
+```bash
+conda create -n iatnas python=3.10 -y
+conda activate iatnas
+```
+
+Install the required packages:
+
+```bash
+pip install torch torchvision
+pip install numpy pandas pillow scikit-learn tqdm medmnist
+```
+
+## Dataset Preparation
+
+### ISIC-2019
+
+Download the ISIC-2019 training images and ground-truth labels, and organize them as follows:
+
+```text
+datasets/
+└── ISIC_2019/
+    ├── ISIC_2019_Training_Input/
+    │   ├── ISIC_0000000.jpg
+    │   ├── ISIC_0000001.jpg
+    │   └── ...
+    ├── ISIC_2019_Training_Input.zip
+    └── ISIC_2019_Training_GroundTruth.csv
+```
+
+The image ZIP file is optional if the images have already been extracted. When the extracted image directory is unavailable, the data loader attempts to extract `ISIC_2019_Training_Input.zip` automatically.
+
+By default, the dataset is divided into training, validation, and test sets using stratified sampling with a ratio of 70%, 15%, and 15%, respectively.
+
+## Architecture Search
+
+### Full IAT-NAS Search
+
+The following command enables all three evolutionary search mechanisms:
+
+```bash
+python ieznas_switchable.py \
+  --dataset isic2019 \
+  --isic_root ./datasets/ISIC_2019 \
+  --isic_size 32 \
+  --proxy tail_fisher \
+  --class_weight_exp 0.3 \
+  --batch_size 128 \
+  --sample_budget 38400 \
+  --mu 64 \
+  --lmbda 64 \
+  --generations 20 \
+  --seeds 0,1,2 \
+  --m1_softmax_parent 1 \
+  --parent_sel softmax \
+  --tau 3.0 \
+  --m2_adaptive_mut 1 \
+  --mutation_rate 0.3 \
+  --m3_var_ctrl 1 \
+  --var_low 1e-6 \
+  --var_high 1e-4 \
+  --out_dir results/iatnas
+```
+
+### Baseline Evolutionary Search
+
+The following command disables the three proposed mechanisms and uses uniform parent selection with a fixed mutation rate:
+
+```bash
+python ieznas_switchable.py \
+  --dataset isic2019 \
+  --isic_root ./datasets/ISIC_2019 \
+  --isic_size 32 \
+  --proxy tail_fisher \
+  --class_weight_exp 0.3 \
+  --batch_size 128 \
+  --sample_budget 38400 \
+  --mu 64 \
+  --lmbda 64 \
+  --generations 20 \
+  --seeds 0,1,2 \
+  --m1_softmax_parent 0 \
+  --parent_sel uniform \
+  --m2_adaptive_mut 0 \
+  --mutation_rate 0.3 \
+  --m3_var_ctrl 0 \
+  --out_dir results/baseline
+```
+
+## Ablation Settings
+
+The three search mechanisms can be independently enabled or disabled using the following arguments:
+
+| Mechanism | Argument | Description |
+|---|---|---|
+| Softmax-based parent selection | `--m1_softmax_parent` | Enables or disables score-guided parent selection |
+| Adaptive mutation | `--m2_adaptive_mut` | Dynamically adjusts the mutation rate for each parent |
+| Variance-based mutation control | `--m3_var_ctrl` | Adjusts the global mutation rate according to population variance |
+
+For fair comparisons, the population size, offspring size, number of generations, sample budget, random seeds, and dataset split should remain unchanged across different ablation settings.
+
+## Main Arguments
+
+| Argument | Default | Description |
+|---|---:|---|
+| `--dataset` | `organcmnist` | Target dataset or MedMNIST subset |
+| `--proxy` | `tail_fisher` | Training-free proxy used for architecture evaluation |
+| `--class_weight_exp` | `0.3` | Exponent used for class-frequency-aware weighting |
+| `--batch_size` | `128` | Batch size used for proxy calculation |
+| `--sample_budget` | `38400` | Number of samples used to calculate each proxy score |
+| `--device` | `cuda:0` | Computing device |
+| `--mu` | `64` | Population size |
+| `--lmbda` | `64` | Number of offspring per generation |
+| `--generations` | `20` | Number of evolutionary generations |
+| `--seeds` | `0` | Comma-separated random seeds |
+| `--parent_sel` | `softmax` | Parent-selection strategy |
+| `--tau` | `3.0` | Temperature used in softmax parent selection |
+| `--mutation_rate` | `0.3` | Initial mutation rate |
+| `--mut_min` | `0.1` | Minimum mutation rate |
+| `--mut_max` | `0.5` | Maximum mutation rate |
+| `--out_dir` | `results/ieznas` | Directory used to save search results |
+| `--report_topk` | `10` | Number of top-ranked architectures to report |
+
+## Output Files
+
+The search results are saved in the directory specified by `--out_dir`.
+
+```text
+results/
+└── iatnas/
+    ├── dataset_configuration_seed0.json
+    ├── dataset_configuration_seed0.csv
+    ├── dataset_configuration_seed1.json
+    ├── dataset_configuration_seed1.csv
+    └── ...
+```
+
+Each JSON file contains:
+
+- Experimental configuration
+- Dataset and proxy information
+- Search parameters
+- Generation-wise search history
+- Top-ranked architectures and their proxy scores
+
+Each CSV file records the following statistics for every generation:
+
+- Best proxy score
+- Mean population score
+- Standard deviation of population scores
+- Number of unique architectures
+- Population entropy
+- Global mutation rate
+
+## Evaluation Metrics
+
+IAT-NAS is evaluated from both classification and architecture-ranking perspectives:
+
+- Classification accuracy
+- Area under the ROC curve
+- F1-score
+- Kendall's rank correlation coefficient
+- Spearman's rank correlation coefficient
+- Architecture search cost
+
+## Reproducibility
+
+To ensure fair and reproducible comparisons, we recommend:
+
+- Using the same dataset split across all methods
+- Keeping the proxy sample budget unchanged
+- Fixing the population size and number of generations
+- Reporting results over multiple random seeds
+- Using identical training settings when evaluating the searched architectures
+
+## Citation
+
+If this work is useful for your research, please cite the corresponding paper. The complete citation information will be added after publication.
+
+## Acknowledgements
+
+This project builds upon the NAS-Bench-201 search space and publicly available clinical image datasets. We thank the authors and maintainers of these resources for supporting reproducible neural architecture search research.
+
+## Contact
+
+If you have questions about the code or experimental settings, please open an issue in this repository.
